@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using MvcProject.Areas.Identity.Data;
 using MvcProject.Data;
+using MvcProject.Models;
 using System.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,5 +54,20 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+
+    try
+    {
+        await ApplicationDbInitializer.SeedDataAsync(serviceProvider);
+    }
+    catch (Exception ex)
+    {
+        var logger = serviceProvider.GetRequiredService<ILogger>();
+        logger.LogError(ex.Message);
+    }
+}
 
 app.Run();
