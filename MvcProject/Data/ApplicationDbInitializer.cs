@@ -25,7 +25,7 @@ public static class ApplicationDbInitializer
         // Create Admin
         const string adminEmail = "admin@gmail.com";
         const string adminPassword = "Admin23$";
-        const string username = "admin";
+        const string username = "admin@gmail.com";
 
         // Check whether such user exist
         if (await userManager.FindByEmailAsync(adminEmail) != null)

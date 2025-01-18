@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MvcProject.Data;
+using MvcProject.Data.Repositories;
 using MvcProject.Models;
+using MvcProject.Services;
 using System.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,9 +32,18 @@ builder.Services
 
 builder.Services
     .AddTransient<IDbConnection>(sp => new SqlConnection(connectionString));
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("Mail"));
+builder.Services.AddTransient<IEmailSender, EmailSenderService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+builder.Services.AddLogging();
 
 var app = builder.Build();
 
@@ -55,6 +67,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.MapRazorPages();
+
 using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
@@ -65,9 +79,9 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        var logger = serviceProvider.GetRequiredService<ILogger>();
-        logger.LogError(ex.Message);
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occured");
     }
 }
 
-app.Run();
+await app.RunAsync();
