@@ -31,11 +31,15 @@
             </ul>
             <!-- Right-side Navigation -->
             <ul class="navbar-nav">
-                @if (User.Identity.IsAuthenticated)
+                @if (User?.Identity?.IsAuthenticated != false)
                 {
-                    <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage">Profile</a>
+                    <li class="nav-link">
+                        <span id="userBalance" class="nav-link text-dark">Balance: Loading...</span>
                     </li>
+                    <li class="nav-item">
+                        <span id="username" class="nav-link text-dark">Loading...</span>
+                    </li>
+
                     <li class="nav-item">
                                 <form method="post" asp-area="Identity" asp-page="/Account/Logout" class="d-inline">
                             <button type="submit" class="btn btn-link nav-link text-dark" style="text-decoration: none;">Logout</button>
@@ -71,5 +75,46 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            function fetchUsername() {
+                $.ajax({
+                    url: '/Home/GetUsername',
+                    method: 'GET',
+                    success: function (response) {
+                        if (response.success) {
+                            $('#username').text(`${response.name}`);
+                        } else {
+                            $('#username').text(`Not found!`);
+                        }
+                    },
+                    error: function () {
+                        $('#username').text('Error loading username.');
+                    }
+                });
+            }
+            function fetchBalance() {
+                $.ajax({
+                    url: 'Home/GetUserBalance',
+                    method: 'GET',
+                    success: function (response) {
+                        if (response.success) {
+                            $('#userBalance').text(`Balance: $${response.balance.toFixed(2)}`);
+                        } else {
+                            $('#userBalance').text('Balance not available.');
+                        }
+                    },
+                    error: function () {
+                        $('#userBalance').text('Error loading balance');
+                    }
+                });
+            }
+
+            fetchUsername();
+            fetchBalance();
+            setInterval(fetchBalance, 30000)
+        });
+    </script>
 </body>
 </html>
