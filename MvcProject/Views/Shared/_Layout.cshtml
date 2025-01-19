@@ -100,7 +100,7 @@
                     method: 'GET',
                     success: function (response) {
                         if (response.success) {
-                            $('#userBalance').text(`Balance: $${response.balance.toFixed(2)}`);
+                            $('#userBalance').text(`Balance: ${response.symbol}${response.balance.toFixed(2)}`);
                         } else {
                             $('#userBalance').text('Balance not available.');
                         }

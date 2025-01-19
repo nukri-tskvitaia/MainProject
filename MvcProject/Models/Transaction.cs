@@ -2,7 +2,7 @@
 
 public partial class Transaction
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.Empty.ToString();
 
     public string? UserId { get; set; }
 

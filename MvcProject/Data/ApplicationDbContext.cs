@@ -22,20 +22,20 @@ public partial class ApplicationDbContext : IdentityDbContext<User>
 
     public DbSet<Wallet> Wallets { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
 
         // Renaming Identity tables
-        modelBuilder.Entity<User>().ToTable("Users");
-        modelBuilder.Entity<IdentityRole>().ToTable("Roles");
-        modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
-        modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
-        modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
-        modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
-        modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
+        builder.Entity<User>().ToTable("Users");
+        builder.Entity<IdentityRole>().ToTable("Roles");
+        builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
+        builder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
+        builder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
+        builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
+        builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
 
-        modelBuilder.Entity<DepositWithdrawRequest>(entity =>
+        builder.Entity<DepositWithdrawRequest>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("Pk_DepositWithdrawRequests_Id");
 
@@ -51,7 +51,7 @@ public partial class ApplicationDbContext : IdentityDbContext<User>
             .HasForeignKey(e => e.UserId); 
         });
 
-        modelBuilder.Entity<Transaction>(entity =>
+        builder.Entity<Transaction>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("Pk_Transactions_Id");
 
@@ -67,7 +67,7 @@ public partial class ApplicationDbContext : IdentityDbContext<User>
                 .HasForeignKey(e => e.UserId);
         });
 
-        modelBuilder.Entity<Wallet>(entity =>
+        builder.Entity<Wallet>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("Pk_Wallet_Id");
 
@@ -82,7 +82,7 @@ public partial class ApplicationDbContext : IdentityDbContext<User>
                 .HasForeignKey<Wallet>(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
-        OnModelCreatingPartial(modelBuilder);
+        OnModelCreatingPartial(builder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

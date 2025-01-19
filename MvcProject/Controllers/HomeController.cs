@@ -83,8 +83,9 @@ public class HomeController : Controller
             return Unauthorized(new { success = false, message = "User ID is missing or invalid." });
         }
 
+        var currencySymbol = await _walletRepository.GetCurrencyAsync(userId);
         var balance = await _walletRepository.GetUserBalanceAsync(userId);
-        return Ok(new { success = true, balance });
+        return Ok(new { success = true, symbol = currencySymbol, balance });
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
