@@ -22,10 +22,11 @@ builder.Services
         options.Password.RequireNonAlphanumeric = true;
         options.Password.RequireUppercase = true;
         options.Password.RequireLowercase = true;
-        options.User.RequireUniqueEmail = true;
-        options.SignIn.RequireConfirmedEmail = true;
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.AllowedForNewUsers = true;
+        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedEmail = true;
+        options.SignIn.RequireConfirmedAccount = true;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
