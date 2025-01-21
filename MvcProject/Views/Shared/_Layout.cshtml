@@ -28,14 +28,35 @@
                 <li class="nav-item">
                     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                 </li>
+                @if (User?.Identity?.IsAuthenticated != false)
+                {
+                    @if (User!.IsInRole("Player"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Transaction" asp-action="Deposit">Deposit</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Transaction" asp-action="Withdraw">Withdraw</a>
+                        </li>
+                    }
+                    @if (User!.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                    }
+                }
             </ul>
             <!-- Right-side Navigation -->
             <ul class="navbar-nav">
                 @if (User?.Identity?.IsAuthenticated != false)
                 {
-                    <li class="nav-link">
-                        <span id="userBalance" class="nav-link text-dark">Balance: Loading...</span>
-                    </li>
+                    @if (User!.IsInRole("Player"))
+                    {
+                        <li class="nav-link">
+                            <span id="userBalance" class="nav-link text-dark">Balance: Loading...</span>
+                        </li>
+                    }
                     <li class="nav-item">
                         <span id="username" class="nav-link text-dark">Loading...</span>
                     </li>

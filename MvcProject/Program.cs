@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MvcProject.Data;
-using MvcProject.Data.Repositories;
 using MvcProject.Models;
 using MvcProject.Services;
 using System.Data;
@@ -33,10 +31,7 @@ builder.Services
 
 builder.Services
     .AddTransient<IDbConnection>(sp => new SqlConnection(connectionString));
-builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("Mail"));
-builder.Services.AddTransient<IEmailSender, EmailSenderService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+DependencyRegister.Register(builder.Services, builder.Configuration);
 
 
 // Add services to the container.
