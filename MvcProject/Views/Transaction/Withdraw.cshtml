@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Withdraw";
+}
+
+<h2>Withdraw</h2>
+<form id="withdraw-form">
+    <div>
+        <label>Amount:</label>
+        <input type="number" id="withdraw-amount" min="1" required />
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    $("#withdraw-form").on("submit", function (e) {
+        e.preventDefault();
+        var amount = $("#withdraw-amount").val();
+
+        $.post("/Transaction/Withdraw", { amount: amount }, function (response) {
+            alert(response.message);
+        });
+    });
+</script>

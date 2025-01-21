@@ -14,14 +14,14 @@ public class WalletRepository : IWalletRepository
         _dbConnection = dbConnection;
     }
 
-    public async Task<Guid> CreateWalletAsync(Wallet wallet)
+    public async Task<string?> CreateWalletAsync(Wallet wallet)
     {
         string query = @"
             INSERT INTO Wallet (Id, UserId, CurrentBalance, Currency)
-            VALUES (@Id, @UserId, @CurrentBalance, @Currency)
-            SELECT CAST(SCOPE_IDENTITY() as int)";
+            VALUES (@Id, @UserId, @CurrentBalance, @Currency);
+            SELECT CAST(SCOPE_IDENTITY() as nvarchar(450))";
 
-        return await _dbConnection.ExecuteScalarAsync<Guid>(query, new
+        return await _dbConnection.ExecuteScalarAsync<string>(query, new
         {
             wallet.Id,
             wallet.UserId,

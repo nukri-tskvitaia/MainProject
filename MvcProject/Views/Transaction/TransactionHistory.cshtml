@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Transaction History";
+}
+
+<h2>Transaction History</h2>
+<table id="transactions-table" class="display">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+</table>
+
+<script>
+    $(document).ready(function () {
+        $("#transactions-table").DataTable({
+            ajax: "/Transaction/GetTransactionHistory",
+            columns: [
+                { data: "id" },
+                { data: "transactionType" },
+                { data: "amount" },
+                { data: "status" },
+                { data: "createdAt" }
+            ]
+        });
+    });
+</script>
