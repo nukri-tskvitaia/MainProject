@@ -10,8 +10,10 @@ public static class DependencyRegister
         services.Configure<MailSettings>(configuration.GetSection("Mail"));
 
         services.AddTransient<IEmailSender, EmailSenderService>();
+        services.AddScoped<IDepositWithdrawService, DepositWithdrawService>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IDepositWithdrawRequestRepository, DepositWithdrawRequestRepository>();
+        services.AddScoped<IBankingApiService, BankingApiService>();
     }
 }
