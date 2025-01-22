@@ -13,7 +13,7 @@ public class DepositController : ControllerBase
 {
     private readonly IConfiguration _configuration;
     private readonly ICallbackService _callbackService;
-    private readonly List<int> _merchants;
+    private readonly List<string> _merchants;
 
     public DepositController(IConfiguration configuration, ICallbackService callbackService, IOptionsMonitor<MerchantSettings> optionsMonitor)
     {
