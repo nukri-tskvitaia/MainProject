@@ -31,6 +31,7 @@ builder.Services
 
 builder.Services
     .AddTransient<IDbConnection>(sp => new SqlConnection(connectionString));
+builder.Services.AddHttpClient();
 DependencyRegister.Register(builder.Services, builder.Configuration);
 
 
