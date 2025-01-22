@@ -13,13 +13,13 @@ public class DepositController : ControllerBase
 {
     private readonly IConfiguration _configuration;
     private readonly ICallbackService _callbackService;
-    private readonly List<string> _merchants;
+    private readonly List<MerchantSettings> _merchants;
 
-    public DepositController(IConfiguration configuration, ICallbackService callbackService, IOptionsMonitor<MerchantSettings> optionsMonitor)
+    public DepositController(IConfiguration configuration, ICallbackService callbackService, IOptionsMonitor<List<MerchantSettings>> optionsMonitor)
     {
         _configuration = configuration;
         _callbackService = callbackService;
-        _merchants = optionsMonitor.CurrentValue.Merchants;
+        _merchants = optionsMonitor.CurrentValue;
     }
 
     [HttpPost("StartDeposit")]
