@@ -2,10 +2,5 @@
 
 public class MerchantSettings
 {
-    public List<string> Merchants { get; set; } = default!;
-
-    public MerchantSettings()
-    {
-        
-    }
+    public List<int> Merchants { get; set; } = default!;
 }
