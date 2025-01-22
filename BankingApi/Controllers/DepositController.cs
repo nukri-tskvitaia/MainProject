@@ -22,7 +22,7 @@ public class DepositController : ControllerBase
         _merchants = optionsMonitor.CurrentValue.Merchants;
     }
 
-    [HttpPost("Deposit")]
+    [HttpPost("StartDeposit")]
     public async Task<IActionResult> Deposit([FromBody] DepositRequest request)
     {
         var validationResult = RequestValidator.ValidateDeposit(_merchants, request.Amount, request.MerchantId);
@@ -55,7 +55,7 @@ public class DepositController : ControllerBase
         });
     }
 
-    [HttpPost("DepositFinish")]
+    [HttpPost("FinishDeposit")]
     public async Task<IActionResult> DepositFinish([FromBody] DepositRequest request)
     {
         /*
