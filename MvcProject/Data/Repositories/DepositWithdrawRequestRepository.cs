@@ -37,4 +37,13 @@ public class DepositWithdrawRequestRepository : IDepositWithdrawRequestRepositor
 
         return await _dbConnection.QueryAsync<DepositWithdrawRequest>(query);
     }
+
+    public async Task<decimal> GetAmountAsync(string transactionId)
+    {
+        string query = @"
+            SELECT Amount FROM DepositWithdrawRequests
+            WHERE Id = @transactionId";
+
+        return await _dbConnection.ExecuteScalarAsync<decimal>(query, new { transactionId } );
+    }
 }

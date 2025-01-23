@@ -56,7 +56,7 @@ public class TransactionController : BaseController
         if (bankingApiResponse.Status == "Success" &&
             !string.IsNullOrWhiteSpace(bankingApiResponse.PaymentUrl))
         {
-            return RedirectToAction(bankingApiResponse.PaymentUrl);
+            return Ok(new { Status = "Success", bankingApiResponse.PaymentUrl });
         }
 
         var errorMessage = bankingApiResponse.ErrorCode switch

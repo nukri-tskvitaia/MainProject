@@ -117,7 +117,7 @@
             }
             function fetchBalance() {
                 $.ajax({
-                    url: 'Home/GetUserBalance',
+                    url: '/Home/GetUserBalance',
                     method: 'GET',
                     success: function (response) {
                         if (response.success) {
