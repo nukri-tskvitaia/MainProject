@@ -56,20 +56,19 @@ public class DepositController : ControllerBase
     }
 
     [HttpPost("FinishDeposit")]
-    public async Task<IActionResult> DepositFinish([FromBody] DepositRequest request)
+    public async Task<IActionResult> DepositFinish([FromQuery] string transactionId, [FromBody] AmountRequest request)
     {
-        /*
         bool isSuccess = (int)(Math.Round(request.Amount, 2) * 100) % 2 == 0;
 
-        var reponse = await _callbackService.NotifyMvcAsync(
-            _configuration["Secrets:DepositCallback"]!,
+        var response = await _callbackService.NotifyMvcAsync(
+            $"{_configuration["Secrets:DepositCallback"]!}/Deposit",
             new MvcCallbackResponse
             {
-                TransactionId = request.Id,
+                TransactionId = transactionId,
                 Amount = request.Amount,
-                Status = "Success"
+                Status = isSuccess ? "Success" : "Rejected"
             });
-        */
-        throw new NotImplementedException();
+
+        return Ok(new { Status = response });
     }
 }
