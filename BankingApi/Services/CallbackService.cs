@@ -11,11 +11,13 @@ public class CallbackService : ICallbackService
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<bool> NotifyMvcAsync(string url, MvcCallbackResponse data)
+    public async Task<CallbackServiceModel?> NotifyMvcAsync(string url, MvcCallbackResponse data)
     {
         var httpClient = _httpClientFactory.CreateClient("BankingApiClient");
         var response = await httpClient.PostAsJsonAsync(url, data);
+
+        var result = await response.Content.ReadFromJsonAsync<CallbackServiceModel?>();
         
-        return response.IsSuccessStatusCode;
+        return result;
     }
 }

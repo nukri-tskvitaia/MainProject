@@ -2,6 +2,7 @@
 using MimeKit;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using MvcProject.Configuration;
 
 namespace MvcProject.Services
 {

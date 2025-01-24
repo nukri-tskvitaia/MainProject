@@ -2,5 +2,6 @@
 
 public interface IDepositWithdrawService
 {
-    public Task<string?> AddDepositWithdrawAsync(string userId, decimal amount);
+    public Task<string?> AddDepositAsync(string userId, decimal amount);
+    public Task<string?> AddWithdrawAsync(string userId, decimal amount);
 }

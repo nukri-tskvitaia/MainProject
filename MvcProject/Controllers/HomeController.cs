@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MvcProject.Data.Repositories;
 using MvcProject.Models;
@@ -40,12 +40,14 @@ public class HomeController : Controller
         return View();
     }
 
+    [Authorize]
     public IActionResult Logout()
     {
         return View();
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetUsername()
     {
         if (!User?.Identity?.IsAuthenticated ?? true)
@@ -70,6 +72,7 @@ public class HomeController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Player")]
     public async Task<IActionResult> GetUserBalance()
     {
         if (!User?.Identity?.IsAuthenticated ?? true)

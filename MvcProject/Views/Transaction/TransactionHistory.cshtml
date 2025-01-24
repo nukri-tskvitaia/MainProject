@@ -3,11 +3,12 @@
 }
 
 <h2>Transaction History</h2>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
 <table id="transactions-table" class="display">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Type</th>
+            <th>Id</th>
+            <th>UserId</th>
             <th>Amount</th>
             <th>Status</th>
             <th>Created At</th>
@@ -15,17 +16,22 @@
     </thead>
 </table>
 
-<script>
-    $(document).ready(function () {
-        $("#transactions-table").DataTable({
-            ajax: "/Transaction/GetTransactionHistory",
-            columns: [
-                { data: "id" },
-                { data: "transactionType" },
-                { data: "amount" },
-                { data: "status" },
-                { data: "createdAt" }
-            ]
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#transactions-table").DataTable({
+                ajax: "/Transaction/GetTransactionHistory",
+                columns: [
+                    { data: "id" },
+                    { data: "userId" },
+                    { data: "amount" },
+                    { data: "status" },
+                    { data: "createdAt" }
+                ]
+            });
         });
-    });
-</script>
+    </script>
+}

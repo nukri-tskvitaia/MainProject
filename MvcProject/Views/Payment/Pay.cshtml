@@ -1,0 +1,94 @@
+﻿@{
+    ViewData["Title"] = "Confirm Payment";
+}
+
+<h2>Confirm Payment</h2>
+
+<p>Please confirm or cancel your payment.</p>
+<div id="buttonContainer">
+    <form id="confirmForm">
+        <button type="submit" id="confirmBtn">Confirm Payment</button>
+    </form>
+    <form id="cancelForm">
+        <button type="submit" id="cancelBtn">Cancel Payment</button>
+    </form>
+</div>
+
+<div id="responseMessage" style="display:none;"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#confirmForm').submit(function (event) {
+                event.preventDefault();
+
+                var transactionId = '@Model.TransactionId';
+
+                if (!transactionId) {
+                    $('#responseMessage').text('Transaction ID is missing.').show();
+                    return;
+                }
+                
+
+                $.ajax({
+                    url: '/Payment/Confirm',
+                    type: 'POST',
+                    data: {
+                        transactionId: transactionId
+                    },
+                    success: function (response) {
+                        console.log(response.message);
+                        $('#responseMessage').text(response?.message).show();
+                        $('#buttonContainer').hide();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        var response = JSON.parse(jqXHR.responseText);
+                        $('#responseMessage').text(response.message).show();
+                        $('#responseMessage').text(response.detail).show();
+                        $('#buttonContainer').hide();
+                    }
+                });
+            });
+        });
+
+        $('#cancelForm').submit(function (event) {
+            event.preventDefault();
+
+            var transactionId = '@Model.TransactionId';
+
+            if (!transactionId) {
+                $('#responseMessage').text('Transaction ID is missing.').show();
+                return;
+            }
+
+            $.ajax({
+                url: '/Payment/Cancel',
+                type: 'POST',
+                data: {
+                    transactionId: transactionId
+                },
+                success: function (response) {
+                    $('#responseMessage').text(response.message).show();
+                    $('#buttonContainer').hide();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    var response = JSON.parse(jqXHR.responseText);
+                    $('#responseMessage').text(response.message).show();
+                    $('#responseMessage').text(response.detail).show();
+                    $('#buttonContainer').hide();
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    #buttonContainer {
+        display: flex;
+        gap: 10px;
+    }
+
+    #confirmBtn, #cancelBtn {
+        padding: 10px 20px;
+    }
+</style>

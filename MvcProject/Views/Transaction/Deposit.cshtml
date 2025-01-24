@@ -6,7 +6,7 @@
 
 <form id="depositForm">
     <label for="amount">Amount:</label>
-    <input type="number" id="amount" name="amount" min="1" step="any" required />
+    <input type="number" id="amount" name="amount" min="0.1" step="any" required />
     <button type="submit" id="depositBtn">Deposit</button>
 </form>
 
@@ -19,7 +19,7 @@
             $('#depositForm').submit(function (event) {
                 event.preventDefault();
 
-                var amount = $('#amount').val();
+                var amount = parseFloat($('#amount').val());
 
                 if (!amount || amount <= 0) {
                     $('#responseMessage').text('Please enter a valid amount.').show();
@@ -42,7 +42,7 @@
                         }
                     },
                     error: function () {
-                        $('#responseMessage').text('An error occurred while processing your request.').show();
+                        $('#responseMessage').text(response.message).show();
                     }
                 });
             });

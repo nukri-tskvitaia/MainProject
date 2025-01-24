@@ -14,20 +14,29 @@ public class WalletRepository : IWalletRepository
         _dbConnection = dbConnection;
     }
 
-    public async Task<string?> CreateWalletAsync(Wallet wallet)
+    public async Task<bool> CreateWalletAsync(Wallet wallet)
     {
-        string query = @"
-            INSERT INTO Wallet (Id, UserId, CurrentBalance, Currency)
-            VALUES (@Id, @UserId, @CurrentBalance, @Currency);
-            SELECT CAST(SCOPE_IDENTITY() as nvarchar(450))";
+        var parameters = new DynamicParameters();
+        parameters.Add("@UserId", wallet.UserId);
+        parameters.Add("@CurrentBalance", wallet.CurrentBalance);
+        parameters.Add("@Currency", wallet.Currency);
+        parameters.Add("@Id", wallet.Id);
+        parameters.Add("@Status", dbType: DbType.String, size: 100, direction: ParameterDirection.Output);
 
-        return await _dbConnection.ExecuteScalarAsync<string>(query, new
+        await _dbConnection.ExecuteAsync(
+            "CreateWallet",
+            parameters,
+            commandType: CommandType.StoredProcedure
+            );
+
+        var status = parameters.Get<string>("@Status");
+
+        if (status == "Failed")
         {
-            wallet.Id,
-            wallet.UserId,
-            wallet.CurrentBalance,
-            wallet.Currency,
-        });
+            return false;
+        }
+
+        return true;
     }
 
     public async Task<decimal> GetUserBalanceAsync(string userId)
@@ -44,5 +53,52 @@ public class WalletRepository : IWalletRepository
         
         var symbol = CurrencyHelper.GetCurrencyAsSymbol(value);
         return symbol;
+    }
+
+    // Done
+    public async Task<bool> DepositBalanceAsync(string userId, decimal balance)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@UserId", userId, DbType.String);
+        parameters.Add("@CurrentBalance", balance, DbType.Decimal);
+        parameters.Add("@Status", dbType: DbType.String, size: 100, direction: ParameterDirection.Output);
+
+        await _dbConnection.ExecuteAsync(
+            "DepositWalletBalance",
+            parameters,
+            commandType: CommandType.StoredProcedure
+            );
+
+        var status = parameters.Get<string>("@Status");
+
+        if (status == "Failed")
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<bool> WithdrawBalanceAsync(string userId, decimal balance)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@UserId", userId, DbType.String);
+        parameters.Add("@CurrentBalance", balance, DbType.Decimal);
+        parameters.Add("@Status", dbType: DbType.String, size: 100, direction: ParameterDirection.Output);
+
+        await _dbConnection.ExecuteAsync(
+            "WithdrawWalletBalance",
+            parameters,
+            commandType: CommandType.StoredProcedure
+            );
+
+        var status = parameters.Get<string>("@Status");
+
+        if (status == "Failed")
+        {
+            return false;
+        }
+
+        return true;
     }
 }

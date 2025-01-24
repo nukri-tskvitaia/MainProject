@@ -3,4 +3,76 @@
 }
 
 <h2>Admin Dashboard</h2>
-<p>Work in progress...</p>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+<table id="requests-table" class="display">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>User</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+</table>
+
+@section Scripts{
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            console.log("Initializing DataTable..."); // Add log
+
+            const table = $("#requests-table").DataTable({
+                ajax: {
+                    url: "/Admin/GetPendingRequests",
+                    dataSrc: function (json) {
+                        console.log("Data received:", json); // Log the data received
+                        return json;
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error("Error loading data:", errorThrown); // Log any errors
+                    }
+                },
+                columns: [
+                    { data: "id" },
+                    { data: "userId" },
+                    { data: "transactionType" },
+                    { data: "amount" },
+                    { data: "status" },
+                    { data: "createdAt" },
+                    {
+                        data: "id",
+                        render: function (id) {
+                            return `
+                                        <button class="btn-approve" data-id="${id}">Approve</button>
+                                        <button class="btn-reject" data-id="${id}">Reject</button>
+                                    `;
+                        }
+                    }
+                ]
+            });
+
+            console.log("DataTable initialized."); // Add log
+
+            $("#requests-table").on("click", ".btn-approve", function () {
+                const id = $(this).data("id");
+                $.post("/Admin/ApproveRequest", { id }, function (response) {
+                    alert(response.message);
+                    table.ajax.reload();
+                });
+            });
+
+            $("#requests-table").on("click", ".btn-reject", function () {
+                const id = $(this).data("id");
+                $.post("/Admin/RejectRequest", { id }, function (response) {
+                    alert(response.message);
+                    table.ajax.reload();
+                });
+            });
+        });
+    </script>
+}

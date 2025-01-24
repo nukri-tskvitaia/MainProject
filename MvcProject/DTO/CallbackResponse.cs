@@ -1,6 +1,6 @@
-﻿namespace BankingApi.DTO;
+﻿namespace MvcProject.DTO;
 
-public class MvcCallbackResponse
+public class CallbackResponse
 {
     public string TransactionId { get; set; } = default!;
     public decimal Amount { get; set; }

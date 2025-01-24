@@ -1,5 +1,5 @@
 ﻿using MvcProject.Data.Repositories;
-using MvcProject.Models;
+using MvcProject.DTO;
 
 namespace MvcProject.Services;
 
@@ -11,18 +11,45 @@ public class DepositWithdrawService : IDepositWithdrawService
     {
         _request = request;
     }
-
-    public async Task<string?> AddDepositWithdrawAsync(string userId, decimal amount)
+    
+    // Done
+    public async Task<string?> AddDepositAsync(string userId, decimal amount)
     {
-        var transaction = new DepositWithdrawRequest
+        var transaction = new DepositWithdrawRequestModel
         {
             UserId = userId,
             TransactionType = "Deposit",
             Amount = amount,
             Status = "Pending",
-            CreatedAt = DateTime.UtcNow,
         };
         
-        return await _request.CreateAsync(transaction);
+        var response = await _request.CreateAsync(transaction);
+
+        if (response == null)
+        {
+            return null;
+        }
+
+        return response;
+    }
+
+    public async Task<string?> AddWithdrawAsync(string userId, decimal amount)
+    {
+        var transaction = new DepositWithdrawRequestModel
+        {
+            UserId = userId,
+            TransactionType = "Withdraw",
+            Amount = amount,
+            Status = "Pending",
+        };
+
+        var response = await _request.CreateAsync(transaction);
+
+        if (response == null)
+        {
+            return null;
+        }
+
+        return response;
     }
 }

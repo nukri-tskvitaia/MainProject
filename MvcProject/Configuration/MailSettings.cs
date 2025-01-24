@@ -1,4 +1,4 @@
-﻿namespace MvcProject.Services;
+﻿namespace MvcProject.Configuration;
 
 public class MailSettings
 {

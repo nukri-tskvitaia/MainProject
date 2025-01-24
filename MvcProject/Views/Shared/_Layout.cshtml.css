@@ -46,3 +46,34 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+.navbar-collapse {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-nav {
+    align-items: center; /* Ensure items are vertically centered */
+}
+
+    .navbar-nav.flex-grow-1 {
+        margin-right: auto; /* Push right-side items to the end */
+    }
+
+    .navbar-nav .nav-item {
+        margin-left: 15px; /* Add some spacing between items */
+    }
+
+#userBalance,
+#username,
+button.nav-link {
+    white-space: nowrap;
+    margin: 0; /* Ensure proper alignment */
+}
+
+.right-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between elements */
+}
