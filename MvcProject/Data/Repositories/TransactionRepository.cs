@@ -37,12 +37,13 @@ public class TransactionRepository : ITransactionRepository
         return true;
     }
 
-    public async Task<IEnumerable<TransactionModel>> GetAllAsync()
+    public async Task<IEnumerable<TransactionModel>> GetAllUserAsync(string userId)
     {
         string query = @"
             SELECT * FROM Transactions
+            WHERE UserId = @userId
             ORDER BY CreatedAt DESC";
 
-        return await _dbConnection.QueryAsync<TransactionModel>(query);
+        return await _dbConnection.QueryAsync<TransactionModel>(query, new { userId});
     }
 }

@@ -6,5 +6,5 @@ namespace MvcProject.Data.Repositories;
 public interface ITransactionRepository
 {
     public Task<bool> CreateAsync(Transaction data);
-    public Task<IEnumerable<TransactionModel>> GetAllAsync();
+    public Task<IEnumerable<TransactionModel>> GetAllUserAsync(string userId);
 }

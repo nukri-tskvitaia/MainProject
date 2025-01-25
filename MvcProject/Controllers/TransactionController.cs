@@ -103,10 +103,10 @@ public class TransactionController : BaseController
         var userId = GetUserId();
         if (userId == null)
         {
-            return Unauthorized("User is not authenticated.");
+            return Unauthorized(new { Message = "User is not authenticated." });
         }
 
-        var transactions = await _transactionRepository.GetAllAsync();
+        var transactions = await _transactionRepository.GetAllUserAsync(userId);
 
         return Json(new { data = transactions });
     }
