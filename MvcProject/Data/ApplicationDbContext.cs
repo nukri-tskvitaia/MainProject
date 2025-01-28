@@ -75,6 +75,7 @@ public partial class ApplicationDbContext : IdentityDbContext<User>
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CurrentBalance).HasColumnType("money").IsRequired();
+            entity.Property(e => e.BlockedAmount).HasColumnType("money").IsRequired();
             entity.Property(e => e.UserId).HasMaxLength(450).IsRequired();
             entity.Property(e => e.Currency).IsRequired();
             entity.HasOne(e => e.User)

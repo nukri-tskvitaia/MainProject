@@ -8,6 +8,8 @@ public partial class Wallet
 
     public decimal CurrentBalance { get; set; }
 
+    public decimal BlockedAmount { get; set; } = 0;
+
     public int Currency { get; set; }
 
     public User User { get; set; } = default!;

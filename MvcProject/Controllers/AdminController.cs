@@ -10,13 +10,16 @@ public class AdminController : Controller
 {
     private readonly IDepositWithdrawRequestRepository _requestRepository;
     private readonly IBankingApiService _bankingApiService;
+    private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         IDepositWithdrawRequestRepository requestRepository,
-        IBankingApiService bankingApiService)
+        IBankingApiService bankingApiService,
+        ILogger<AdminController> logger)
     {
         _requestRepository = requestRepository;
         _bankingApiService = bankingApiService;
+        _logger = logger;
     }
 
     public IActionResult Dashboard() => View();
@@ -24,6 +27,7 @@ public class AdminController : Controller
     [HttpGet]
     public async Task<IActionResult> GetPendingRequests()
     {
+        _logger.LogInformation("Fetching pending requests.");
         var pendingRequests = await _requestRepository.GetPendingRequestsAsync("Pending", "Withdraw");
 
         return Json(pendingRequests);
@@ -32,6 +36,7 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> ApproveRequest(string id)
     {
+        _logger.LogInformation("Attempting to approve request with ID: {Id}", id);
         var request = await _requestRepository.GetByIdAsync(int.Parse(id));
 
         if (request == null || request.Status != "Pending")
@@ -47,6 +52,7 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> RejectRequest(string id)
     {
+        _logger.LogInformation("Attempting to reject request with ID: {Id}", id);
         var request = await _requestRepository.GetByIdAsync(int.Parse(id));
 
         if (request == null || request.Status != "Pending")

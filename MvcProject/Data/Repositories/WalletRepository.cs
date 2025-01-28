@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using MvcProject.DTO;
 using MvcProject.Helper;
 using MvcProject.Models;
 using System.Data;
@@ -55,6 +56,15 @@ public class WalletRepository : IWalletRepository
         return symbol;
     }
 
+    public async Task<WalletBallanceRequest> CheckAvailableBalanceAsync(string userId)
+    {
+        string query = "SELECT CurrentBalance, BlockedAmount FROM Wallet WHERE UserId = @userId";
+        var result = await _dbConnection
+            .QuerySingleOrDefaultAsync<WalletBallanceRequest >(query, new { userId });
+
+        return result ?? throw new InvalidOperationException("Such row does not exist.");
+    }
+
     // Done
     public async Task<bool> DepositBalanceAsync(string userId, decimal balance)
     {
@@ -79,11 +89,12 @@ public class WalletRepository : IWalletRepository
         return true;
     }
 
-    public async Task<bool> WithdrawBalanceAsync(string userId, decimal balance)
+    public async Task<bool> WithdrawBalanceAsync(string userId, decimal balance, decimal blockedAmount)
     {
         var parameters = new DynamicParameters();
         parameters.Add("@UserId", userId, DbType.String);
         parameters.Add("@CurrentBalance", balance, DbType.Decimal);
+        parameters.Add("@BlockedAmount", blockedAmount, DbType.Decimal);
         parameters.Add("@Status", dbType: DbType.String, size: 100, direction: ParameterDirection.Output);
 
         await _dbConnection.ExecuteAsync(

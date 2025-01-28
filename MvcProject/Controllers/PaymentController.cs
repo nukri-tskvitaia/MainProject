@@ -9,20 +9,25 @@ public class PaymentController : Controller
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly IDepositWithdrawRequestRepository _requestRepository;
+    private readonly ILogger<PaymentController> _logger;
 
     public PaymentController(IHttpClientFactory httpClientFactory, IConfiguration configuration,
-        IDepositWithdrawRequestRepository requestRepository)
+        IDepositWithdrawRequestRepository requestRepository, ILogger<PaymentController> logger)
     {
         _httpClientFactory = httpClientFactory;
         _configuration = configuration;
         _requestRepository = requestRepository;
+        _logger = logger;
     }
 
     [HttpGet]
     public IActionResult Pay(string transactionId)
     {
+        _logger.LogInformation("Pay method called with transactionId: {TransactionId}", transactionId);
+
         if (string.IsNullOrEmpty(transactionId))
         {
+            _logger.LogWarning("Transaction ID is required.");
             return BadRequest("Transaction ID is required.");
         }
 
@@ -35,6 +40,8 @@ public class PaymentController : Controller
     [HttpPost]
     public async Task<IActionResult> Confirm(string transactionId)
     {
+        _logger.LogInformation("Confirm method called with transactionId: {TransactionId}", transactionId);
+        
         var client = _httpClientFactory.CreateClient();
         var amount = await _requestRepository.GetAmountAsync(transactionId);
         try
@@ -46,13 +53,16 @@ public class PaymentController : Controller
 
             if (status != "Success")
             {
+                _logger.LogWarning("Payment rejected for transactionId: {TransactionId}", transactionId);
                 return BadRequest(new { Message = "Payment has been rejected" });
-                }
+            }
 
+            _logger.LogInformation("Payment processed successfully for transactionId: {TransactionId}", transactionId);
             return Json(new { Message = "Payment has been processed successfully." });
         }
         catch(Exception ex)
         {
+            _logger.LogError(ex, "Internal error occurred while processing payment for transactionId: {TransactionId}", transactionId);
             return BadRequest(new { Message = "Internal Error.", Detail = ex.Message });
         }
     }
@@ -60,13 +70,17 @@ public class PaymentController : Controller
     [HttpPost]
     public async Task<IActionResult> Cancel(string transactionId)
     {
+        _logger.LogInformation("Cancel method called with transactionId: {TransactionId}", transactionId);
+
         try
         {
             await _requestRepository.DeleteAsync(transactionId);
+            _logger.LogInformation("Payment cancelled successfully for transactionId: {TransactionId}", transactionId);
             return Json(new { Message = "Payment has been cancelled." });
         }
         catch(Exception ex)
         {
+            _logger.LogError(ex, "Failed to cancel payment for transactionId: {TransactionId}", transactionId);
             return BadRequest(new { Message = "Failed to update status.", Detail = ex.Message });
         }
     }
