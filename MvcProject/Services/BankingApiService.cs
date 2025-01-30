@@ -16,7 +16,7 @@ public class BankingApiService : IBankingApiService
     }
 
     // Done
-    public async Task<DepositBankingApiResponse> DepositBankingApiAsync(string depositWithdrawId, decimal amount)
+    public async Task<DepositBankingApiResponse> DepositBankingApiAsync(int depositWithdrawId, decimal amount)
     {
         var hash = HashGenerator.GenerateHash(
             amount, _configuration["Secrets:MerchantId"]!,
@@ -37,7 +37,7 @@ public class BankingApiService : IBankingApiService
         return responseContent!;
     }
 
-    public async Task<WithdrawBankingApiResponse> WithdrawBankingApiAsync(string depositWithdrawId, decimal amount)
+    public async Task<WithdrawBankingApiResponse> WithdrawBankingApiAsync(int depositWithdrawId, decimal amount)
     {
         var hash = HashGenerator.GenerateHash(
             amount, _configuration["Secrets:MerchantId"]!,

@@ -7,8 +7,7 @@
 <table id="transactions-table" class="display">
     <thead>
         <tr>
-            <th>Id</th>
-            <th>UserId</th>
+            <th>TransactionType</th>
             <th>Amount</th>
             <th>Status</th>
             <th>Created At</th>
@@ -25,11 +24,26 @@
             $("#transactions-table").DataTable({
                 ajax: "/Transaction/GetTransactionHistory",
                 columns: [
-                    { data: "id" },
-                    { data: "userId" },
+                    { data: "transactionType" },
                     { data: "amount" },
                     { data: "status" },
-                    { data: "createdAt" }
+                    {
+                        data: "createdAt",
+                        render: function (data) {
+                            if (!data) return "N/A";
+                            let date = new Date(data);
+                            return date.toLocaleString('en-US', {
+                                timeZone: 'UTC',
+                                year: 'numeric',
+                                month: 'short',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: true
+                            }) + " UTC";
+                        }
+                    }
                 ]
             });
         });

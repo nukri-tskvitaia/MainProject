@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using log4net;
+using Microsoft.AspNetCore.Mvc;
 using MvcProject.Data.Repositories;
 using MvcProject.DTO;
 
@@ -9,25 +10,32 @@ public class PaymentController : Controller
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly IDepositWithdrawRequestRepository _requestRepository;
-    private readonly ILogger<PaymentController> _logger;
+    private static readonly ILog _logger = LogManager.GetLogger(typeof(PaymentController));
 
-    public PaymentController(IHttpClientFactory httpClientFactory, IConfiguration configuration,
-        IDepositWithdrawRequestRepository requestRepository, ILogger<PaymentController> logger)
+    public PaymentController(
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration,
+        IDepositWithdrawRequestRepository requestRepository)
     {
         _httpClientFactory = httpClientFactory;
         _configuration = configuration;
         _requestRepository = requestRepository;
-        _logger = logger;
     }
 
     [HttpGet]
-    public IActionResult Pay(string transactionId)
+    public IActionResult Pay(int transactionId)
     {
-        _logger.LogInformation("Pay method called with transactionId: {TransactionId}", transactionId);
+        _logger.InfoFormat("Successfully processed withdraw callback for TransactionId: {0}", transactionId);
 
-        if (string.IsNullOrEmpty(transactionId))
+        if (!ModelState.IsValid)
         {
-            _logger.LogWarning("Transaction ID is required.");
+            _logger.Warn("Model state is invalid.");
+            return BadRequest(new { Message = ModelState });
+        }
+
+        if (transactionId <= 0)
+        {
+            _logger.Warn("Transaction ID is required.");
             return BadRequest("Transaction ID is required.");
         }
 
@@ -38,10 +46,16 @@ public class PaymentController : Controller
 
     // Done
     [HttpPost]
-    public async Task<IActionResult> Confirm(string transactionId)
+    public async Task<IActionResult> Confirm(int transactionId)
     {
-        _logger.LogInformation("Confirm method called with transactionId: {TransactionId}", transactionId);
-        
+        _logger.InfoFormat("Successfully processed withdraw callback for TransactionId: {0}", transactionId);
+
+        if (!ModelState.IsValid)
+        {
+            _logger.Warn("Model state is invalid.");
+            return BadRequest(new { Message = ModelState });
+        }
+
         var client = _httpClientFactory.CreateClient();
         var amount = await _requestRepository.GetAmountAsync(transactionId);
         try
@@ -53,34 +67,40 @@ public class PaymentController : Controller
 
             if (status != "Success")
             {
-                _logger.LogWarning("Payment rejected for transactionId: {TransactionId}", transactionId);
+                _logger.InfoFormat("Payment rejected for transactionId: {0}", transactionId);
                 return BadRequest(new { Message = "Payment has been rejected" });
             }
 
-            _logger.LogInformation("Payment processed successfully for transactionId: {TransactionId}", transactionId);
+            _logger.InfoFormat("Payment processed successfully for transactionId: {0}", transactionId);
             return Json(new { Message = "Payment has been processed successfully." });
         }
         catch(Exception ex)
         {
-            _logger.LogError(ex, "Internal error occurred while processing payment for transactionId: {TransactionId}", transactionId);
+            _logger.ErrorFormat("Internal error occurred while processing payment for transactionId: {0} - {1}", transactionId, ex.Message);
             return BadRequest(new { Message = "Internal Error.", Detail = ex.Message });
         }
     }
 
     [HttpPost]
-    public async Task<IActionResult> Cancel(string transactionId)
+    public async Task<IActionResult> Cancel(int transactionId)
     {
-        _logger.LogInformation("Cancel method called with transactionId: {TransactionId}", transactionId);
+        _logger.InfoFormat("Cancel method called with transactionId: {0}", transactionId);
+
+        if (!ModelState.IsValid)
+        {
+            _logger.Warn("Model state is invalid.");
+            return BadRequest(new { Message = ModelState });
+        }
 
         try
         {
-            await _requestRepository.DeleteAsync(transactionId);
-            _logger.LogInformation("Payment cancelled successfully for transactionId: {TransactionId}", transactionId);
+            await _requestRepository.UpdateStatusAsync(transactionId, "Rejected");
+            _logger.InfoFormat("Payment cancelled successfully for transactionId: {0}", transactionId);
             return Json(new { Message = "Payment has been cancelled." });
         }
         catch(Exception ex)
         {
-            _logger.LogError(ex, "Failed to cancel payment for transactionId: {TransactionId}", transactionId);
+            _logger.ErrorFormat("Internal error occurred while processing payment for transactionId: {0} - {1}", transactionId, ex.Message);
             return BadRequest(new { Message = "Failed to update status.", Detail = ex.Message });
         }
     }

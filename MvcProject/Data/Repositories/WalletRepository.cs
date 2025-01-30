@@ -1,7 +1,6 @@
 ﻿using Dapper;
 using MvcProject.DTO;
 using MvcProject.Helper;
-using MvcProject.Models;
 using System.Data;
 
 namespace MvcProject.Data.Repositories;
@@ -15,29 +14,29 @@ public class WalletRepository : IWalletRepository
         _dbConnection = dbConnection;
     }
 
-    public async Task<bool> CreateWalletAsync(Wallet wallet)
+    public async Task<CreateWalletResponse> CreateWalletAsync(WalletModel wallet)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@UserId", wallet.UserId);
-        parameters.Add("@CurrentBalance", wallet.CurrentBalance);
-        parameters.Add("@Currency", wallet.Currency);
         parameters.Add("@Id", wallet.Id);
-        parameters.Add("@Status", dbType: DbType.String, size: 100, direction: ParameterDirection.Output);
+        parameters.Add("@UserId", wallet.UserId);
+        parameters.Add("@Amount", wallet.Amount);
+        parameters.Add("@Currency", wallet.Currency);
+        parameters.Add("@BlockedAmount", wallet.BlockedAmount);
+        parameters.Add("@Status", dbType: DbType.String, size: 30, direction: ParameterDirection.Output);
+        parameters.Add("@ErrorMessage", dbType: DbType.String, size: 4000, direction: ParameterDirection.Output);
 
         await _dbConnection.ExecuteAsync(
             "CreateWallet",
             parameters,
             commandType: CommandType.StoredProcedure
             );
-
-        var status = parameters.Get<string>("@Status");
-
-        if (status == "Failed")
+        var response = new CreateWalletResponse
         {
-            return false;
-        }
+            Status = parameters.Get<string>("@Status"),
+            ErrorMessage = parameters.Get<string>("@ErrorMessage")
+        };
 
-        return true;
+        return response;
     }
 
     public async Task<decimal> GetUserBalanceAsync(string userId)

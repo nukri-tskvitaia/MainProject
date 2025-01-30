@@ -1,8 +1,14 @@
 using BankingApi.Services;
+using log4net.Config;
+using log4net;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()!);
+XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

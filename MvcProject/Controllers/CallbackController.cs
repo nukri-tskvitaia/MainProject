@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using log4net;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MvcProject.Configuration;
 using MvcProject.Data.Repositories;
@@ -13,35 +14,36 @@ public class CallbackController : Controller
     private readonly IDepositWithdrawRequestRepository _requestRepository;
     private readonly ITransactionRepository _transactionRepository;
     private readonly IWalletRepository _walletRepository;
+    private readonly IProcessRepository _processRepository;
     private readonly IConfiguration _configuration;
     private readonly List<ClientSettings> _clients;
-    private readonly ILogger<CallbackController> _logger;
+    private static readonly ILog _logger = LogManager.GetLogger(typeof(CallbackController));
 
     public CallbackController(
         IDepositWithdrawRequestRepository requestRepository,
         ITransactionRepository transactionRepository,
         IWalletRepository walletRepository,
+        IProcessRepository processRepository,
         IConfiguration configuration,
-        IOptionsMonitor<List<ClientSettings>> optionsMonitor,
-        ILogger<CallbackController> logger)
+        IOptionsMonitor<List<ClientSettings>> optionsMonitor)
     {
         _requestRepository = requestRepository;
         _transactionRepository = transactionRepository;
         _walletRepository = walletRepository;
+        _processRepository = processRepository;
         _configuration = configuration;
         _clients = optionsMonitor.CurrentValue;
-        _logger = logger;
     }
 
     // Done
     [HttpPost]
     public async Task<IActionResult> HandleDeposit([FromBody] CallbackResponse response)
     {
-        _logger.LogInformation("Handling deposit callback for TransactionId: {TransactionId}", response.TransactionId);
+        _logger.InfoFormat("Handling deposit callback for TransactionId: {0}", response.TransactionId);
 
         if (!ModelState.IsValid)
         {
-            _logger.LogWarning("Invalid model state for deposit callback: {@Response}", response);
+            _logger.WarnFormat("Invalid model state for deposit callback: {0}", response);
             return BadRequest(new
             {
                 ErrorCode = "INVALID_DATA",
@@ -49,11 +51,11 @@ public class CallbackController : Controller
             });
         }
 
-        var validationResult = RequestValidator.ValidateDeposit(
+        var validationResult = RequestValidator.ValidateMerchant(
             _clients, response.ClientId);
         if (!validationResult)
         {
-            _logger.LogWarning("Invalid client ID validation failed for TransactionId: {TransactionId}", response.TransactionId);
+            _logger.WarnFormat("Invalid client ID validation failed for TransactionId: {0}", response.TransactionId);
             return BadRequest(new
             {
                 ErrorCode = "INVALID_DATA",
@@ -66,21 +68,10 @@ public class CallbackController : Controller
             response.TransactionId, _configuration["Secrets:Key"]!);
         if (hashValidationResult != response.Hash)
         {
-            _logger.LogWarning("Invalid hash for TransactionId: {TransactionId}. Expected: {ExpectedHash}, Received: {ReceivedHash}", response.TransactionId, hashValidationResult, response.Hash);
+            _logger.WarnFormat("Invalid hash for TransactionId: {0}. Expected: {1}, Received: {2}", response.TransactionId, hashValidationResult, response.Hash);
             return BadRequest(new
             {
                 ErrorCode = "INVALID_HASH",
-                Status = false
-            });
-        }
-
-        var requestResult = await _requestRepository.UpdateStatusAsync(response.TransactionId, response.Status);
-        if (!requestResult)
-        {
-            _logger.LogError("Failed to update deposit request status for TransactionId: {TransactionId}", response.TransactionId);
-            return BadRequest(new
-            {
-                ErrorCode = "FAILED_UPDATE_DEPOSITWITHDRAW",
                 Status = false
             });
         }
@@ -89,39 +80,30 @@ public class CallbackController : Controller
             .GetUserIdAsync(response.TransactionId);
         ArgumentException.ThrowIfNullOrEmpty(userId);
 
-        _logger.LogInformation("Creating transaction record for TransactionId: {TransactionId}", response.TransactionId);
-        var transactionResult = await _transactionRepository.CreateAsync(new Transaction
+        var transaction = new Transaction
         {
             Id = Guid.NewGuid().ToString(),
             UserId = userId,
             Amount = response.Amount,
             Status = response.Status,
             CreatedAt = DateTime.UtcNow,
-        });
-        if (!transactionResult)
+            TransactionType = "Deposit"
+        };
+
+        _logger.Info("Processing Deposit");
+        var result = await _processRepository.ProcessDepositAsync(response.TransactionId, transaction);
+
+        if (result.Status == "Failed")
         {
-            _logger.LogError("Failed to create transaction record for TransactionId: {TransactionId}", response.TransactionId);
+            _logger.ErrorFormat("Processing Deposit Failed - {0}", result.ErrorMessage);
             return BadRequest(new
             {
-                ErrorCode = "FAILED_CREATE_TRANSACTION",
+                ErrorCode = "FAILED_PROCESS_DEPOSIT",
                 Status = false
             });
         }
-        if (response.Status == "Success")
-        {
-            var walletResult = await _walletRepository.DepositBalanceAsync(userId, response.Amount);
-            if (!walletResult)
-            {
-                _logger.LogError("Failed to update wallet balance for UserId: {UserId}", userId);
-                return BadRequest(new
-                {
-                    ErrorCode = "FAILED_UPDATE_WALLET",
-                    Status = false
-                });
-            }
-        }
 
-        _logger.LogInformation("Successfully processed deposit callback for TransactionId: {TransactionId}", response.TransactionId);
+        _logger.InfoFormat("Successfully processed deposit callback for TransactionId: {0}", response.TransactionId);
         return Ok(new
         {
             Status = true
@@ -131,11 +113,11 @@ public class CallbackController : Controller
     [HttpPost]
     public async Task<IActionResult> HandleWithdraw([FromBody] CallbackResponse response)
     {
-        _logger.LogInformation("Handling withdraw callback for TransactionId: {TransactionId}", response.TransactionId);
+        _logger.InfoFormat("Handling withdraw callback for TransactionId: {0}", response.TransactionId);
 
         if (!ModelState.IsValid)
         {
-            _logger.LogWarning("Invalid model state for withdraw callback: {@Response}", response);
+            _logger.WarnFormat("Invalid model state for withdraw callback: {0}", response);
             return BadRequest(new
             {
                 ErrorCode = "INVALID_DATA",
@@ -143,11 +125,11 @@ public class CallbackController : Controller
             });
         }
 
-        var validationResult = RequestValidator.ValidateDeposit(
+        var validationResult = RequestValidator.ValidateMerchant(
             _clients, response.ClientId);
         if (!validationResult)
         {
-            _logger.LogWarning("Invalid client ID validation failed for TransactionId: {TransactionId}", response.TransactionId);
+            _logger.WarnFormat("Invalid client ID validation failed for TransactionId: {0}", response.TransactionId);
             return BadRequest(new
             {
                 ErrorCode = "INVALID_DATA",
@@ -160,7 +142,7 @@ public class CallbackController : Controller
             response.TransactionId, _configuration["Secrets:Key"]!);
         if (hashValidationResult != response.Hash)
         {
-            _logger.LogWarning("Invalid hash for TransactionId: {TransactionId}. Expected: {ExpectedHash}, Received: {ReceivedHash}", response.TransactionId, validationResult, response.Hash);
+            _logger.WarnFormat("Invalid hash for TransactionId: {0}. Expected: {1}, Received: {2}", response.TransactionId, validationResult, response.Hash);
             return BadRequest(new
             {
                 ErrorCode = "INVALID_HASH",
@@ -172,62 +154,30 @@ public class CallbackController : Controller
             .GetUserIdAsync(response.TransactionId);
         ArgumentException.ThrowIfNullOrEmpty(userId);
 
-        var checkAvailableBalance = await _walletRepository.CheckAvailableBalanceAsync(userId);
-        if ((checkAvailableBalance.CurrentBalance - checkAvailableBalance.BlockedAmount) < response.Amount)
-        {
-            _logger.LogWarning("Insufficient funds for UserId: {UserId}", userId);
-            return BadRequest(new
-            {
-                ErrorCode = "INSUFFICIENT_FUNDS",
-                Status = false
-            });
-        }
-
-        var requestResult = await _requestRepository.UpdateStatusAsync(response.TransactionId, response.Status);
-        if (!requestResult)
-        {
-            _logger.LogError("Failed to update withdraw request status for TransactionId: {TransactionId}", response.TransactionId);
-            return BadRequest(new
-            {
-                ErrorCode = "FAILED_UPDATE_DEPOSITWITHDRAW",
-                Status = false
-            });
-        }
-
-        _logger.LogInformation("Creating transaction record for TransactionId: {TransactionId}", response.TransactionId);
-        var transactionResult = await _transactionRepository.CreateAsync(new Transaction
+        var transaction = new Transaction
         {
             Id = Guid.NewGuid().ToString(),
             UserId = userId,
             Amount = response.Amount,
             Status = response.Status,
             CreatedAt = DateTime.UtcNow,
-        });
-        if (!transactionResult)
+            TransactionType = "Withdraw"
+        };
+
+        _logger.Info("Processing Withdraw");
+        var result = await _processRepository.ProcessWithdrawAsync(response.TransactionId, transaction);
+
+        if (result.Status == "Failed")
         {
-            _logger.LogError("Failed to create transaction record for TransactionId: {TransactionId}", response.TransactionId);
+            _logger.ErrorFormat("Processing Withdraw Failed - {0}", result.ErrorMessage);
             return BadRequest(new
             {
-                ErrorCode = "FAILED_CREATE_TRANSACTION",
+                ErrorCode = "FAILED_PROCESS_WITHDRAW",
                 Status = false
             });
         }
 
-        if (response.Status == "Success")
-        {
-            var walletResult = await _walletRepository.WithdrawBalanceAsync(userId, response.Amount, checkAvailableBalance.BlockedAmount);
-            if (!walletResult)
-            {
-                _logger.LogError("Failed to update wallet balance for UserId: {UserId}", userId);
-                return BadRequest(new
-                {
-                    ErrorCode = "FAILED_UPDATE_WALLET",
-                    Status = false
-                });
-            }
-        }
-
-        _logger.LogInformation("Successfully processed withdraw callback for TransactionId: {TransactionId}", response.TransactionId);
+        _logger.InfoFormat("Successfully processed withdraw callback for TransactionId: {0}", response.TransactionId);
         return Ok(new
         {
             Status = true

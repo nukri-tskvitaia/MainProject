@@ -43,7 +43,23 @@
                     { data: "transactionType" },
                     { data: "amount" },
                     { data: "status" },
-                    { data: "createdAt" },
+                    {
+                        data: "createdAt",
+                        render: function (data) {
+                            if (!data) return "N/A";
+                            let date = new Date(data);
+                            return date.toLocaleString('en-US', {
+                                timeZone: 'UTC',
+                                year: 'numeric',
+                                month: 'short',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: true
+                            }) + " UTC";
+                        }
+                    },
                     {
                         data: "id",
                         render: function (id) {

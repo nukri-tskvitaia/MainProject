@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +20,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using MvcProject.Data.Repositories;
+using MvcProject.DTO;
 using MvcProject.Helper;
 using MvcProject.Models;
 
@@ -30,7 +32,7 @@ namespace MvcProject.Areas.Identity.Pages.Account
         private readonly UserManager<User> _userManager;
         private readonly IUserStore<User> _userStore;
         private readonly IUserEmailStore<User> _emailStore;
-        private readonly ILogger<RegisterModel> _logger;
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(RegisterModel));
         private readonly IEmailSender _emailSender;
         private readonly IWalletRepository _walletRepository;
 
@@ -38,7 +40,6 @@ namespace MvcProject.Areas.Identity.Pages.Account
             UserManager<User> userManager,
             IUserStore<User> userStore,
             SignInManager<User> signInManager,
-            ILogger<RegisterModel> logger,
             IEmailSender emailSender,
             IWalletRepository walletRepository)
         {
@@ -46,7 +47,6 @@ namespace MvcProject.Areas.Identity.Pages.Account
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
-            _logger = logger;
             _emailSender = emailSender;
             _walletRepository = walletRepository;
         }
@@ -129,17 +129,42 @@ namespace MvcProject.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    _logger.Info("User created a new account with password.");
 
-                    await _userManager.AddToRoleAsync(user, "Player");
+                    var addToRoleResponse = await _userManager.AddToRoleAsync(user, "Player");
 
-                    await _walletRepository.CreateWalletAsync(new Wallet
+                    if (!addToRoleResponse.Succeeded)
+                    {
+                        _logger.Error("Error adding user to role. Rolling back all the changes.");
+                        await _userManager.DeleteAsync(user);
+
+                        foreach (var error in addToRoleResponse.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+
+                        return Page();
+                    }
+
+                    _logger.Info("Creating user wallet.");
+                    var createWalletResponse = await _walletRepository.CreateWalletAsync(new WalletModel
                     {
                         Id = Guid.NewGuid().ToString(),
                         UserId = user.Id,
-                        CurrentBalance = 0m,
-                        Currency =CurrencyHelper.GetCurrencyAsValue(Input.Currency),
+                        Amount = 0m,
+                        Currency = CurrencyHelper.GetCurrencyAsValue(Input.Currency),
                     });
+
+                    if (createWalletResponse.Status == "Failed")
+                    {
+                        _logger.ErrorFormat("Error creating user wallet. Rolling back all the changes: {0}", createWalletResponse.ErrorMessage);
+                        await _userManager.RemoveFromRoleAsync(user, "Player");
+                        await _userManager.DeleteAsync(user);
+
+                        ModelState.AddModelError(string.Empty, "Failed to create wallet. Please try again.");
+
+                        return Page();
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

@@ -2,7 +2,7 @@
 
 public record WithdrawRequest
 {
-    public string Id { get; set; } = default!;
+    public int Id { get; set; } = default!;
     public decimal Amount { get; set; }
     public string MerchantID { get; set; } = default!;
     // public string UsersAccountNumber { get; set; } = string.Empty;

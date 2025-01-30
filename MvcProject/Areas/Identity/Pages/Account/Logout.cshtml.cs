@@ -4,6 +4,7 @@
 
 using System;
 using System.Threading.Tasks;
+using log4net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,18 +17,17 @@ namespace MvcProject.Areas.Identity.Pages.Account
     public class LogoutModel : PageModel
     {
         private readonly SignInManager<User> _signInManager;
-        private readonly ILogger<LogoutModel> _logger;
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(LogoutModel));
 
-        public LogoutModel(SignInManager<User> signInManager, ILogger<LogoutModel> logger)
+        public LogoutModel(SignInManager<User> signInManager)
         {
             _signInManager = signInManager;
-            _logger = logger;
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out.");
+            _logger.Info("User logged out.");
             if (returnUrl != null)
             {
                 return LocalRedirect(returnUrl);

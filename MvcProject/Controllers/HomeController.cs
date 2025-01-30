@@ -1,3 +1,4 @@
+using log4net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MvcProject.Data.Repositories;
@@ -9,13 +10,12 @@ namespace MvcProject.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
     private readonly IUserRepository _userRepository;
     private readonly IWalletRepository _walletRepository;
+    private static readonly ILog _logger = LogManager.GetLogger(typeof(HomeController));
 
-    public HomeController(ILogger<HomeController> logger, IUserRepository user, IWalletRepository walletRepository)
+    public HomeController(IUserRepository user, IWalletRepository walletRepository)
     {
-        _logger = logger;
         _userRepository = user;
         _walletRepository = walletRepository;
     }
@@ -52,27 +52,27 @@ public class HomeController : Controller
     {
         if (!User?.Identity?.IsAuthenticated ?? true)
         {
-            _logger.LogWarning("User is not authenticated.");
+            _logger.Warn("User is not authenticated.");
             return Unauthorized(new { success = false, message = "User is not authenticated." });
         }
 
         var userId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
         {
-            _logger.LogWarning("User ID is missing or invalid.");
+            _logger.Warn("User ID is missing or invalid.");
             return Unauthorized(new { success = false, message = "User ID is missing or invalid." });
         }
 
-        _logger.LogInformation("Fetching username for user ID: {UserId}", userId);
+        _logger.InfoFormat("Fetching username for user ID: {0}", userId);
         var username = await _userRepository.GetUsernameAsync(userId);
 
         if (string.IsNullOrEmpty(username))
         {
-            _logger.LogWarning("Username not found for user ID: {UserId}", userId);
+            _logger.WarnFormat("Username not found for user ID: {0}", userId);
             return NotFound(new { success = false, message = "Username not found." });
         }
 
-        _logger.LogInformation("Username retrieved successfully for user ID: {UserId}", userId);
+        _logger.InfoFormat("Username retrieved successfully for user ID: {0}", userId);
         return Ok(new { success = true, name = username });
     }
 
@@ -82,22 +82,18 @@ public class HomeController : Controller
     {
         if (!User?.Identity?.IsAuthenticated ?? true)
         {
-            _logger.LogWarning("User is not authenticated.");
             return Unauthorized(new { success = false, message = "User is not authenticated." });
         }
 
         var userId = User?.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
         {
-            _logger.LogWarning("User ID is missing or invalid.");
             return Unauthorized(new { success = false, message = "User ID is missing or invalid." });
         }
 
-        _logger.LogInformation("Fetching balance and currency for user ID: {UserId}", userId);
         var currencySymbol = await _walletRepository.GetCurrencyAsync(userId);
         var balance = await _walletRepository.GetUserBalanceAsync(userId);
 
-        _logger.LogInformation("Balance and currency retrieved successfully for user ID: {UserId}", userId);
         return Ok(new { success = true, symbol = currencySymbol, balance });
     }
 

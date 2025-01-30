@@ -5,7 +5,7 @@ namespace MvcProject.Data.Repositories;
 
 public interface IWalletRepository
 {
-    public Task<bool> CreateWalletAsync(Wallet wallet);
+    public Task<CreateWalletResponse> CreateWalletAsync(WalletModel wallet);
     public Task<decimal> GetUserBalanceAsync(string userId);
     public Task<char> GetCurrencyAsync(string userId);
     public Task<bool> DepositBalanceAsync(string userId, decimal balance);

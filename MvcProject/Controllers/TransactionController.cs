@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using log4net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MvcProject.Data.Repositories;
 using MvcProject.Services;
@@ -11,18 +12,16 @@ public class TransactionController : BaseController
     private readonly IDepositWithdrawService _depositWithdrawService;
     private readonly IBankingApiService _bankingApiService;
     private readonly ITransactionRepository _transactionRepository;
-    private readonly ILogger<TransactionController> _logger;
+    private static readonly ILog _logger = LogManager.GetLogger(typeof(TransactionController));
 
     public TransactionController(
         IBankingApiService bankingApiService,
         IDepositWithdrawService depositWithdrawService,
-        ITransactionRepository transactionRepository,
-        ILogger<TransactionController> logger)
+        ITransactionRepository transactionRepository)
     {
         _bankingApiService = bankingApiService;
         _depositWithdrawService = depositWithdrawService;
         _transactionRepository = transactionRepository;
-        _logger = logger;
     }
 
     public IActionResult Deposit() => View();
@@ -31,43 +30,43 @@ public class TransactionController : BaseController
     [HttpPost]
     public async Task<IActionResult> Deposit(decimal amount)
     {
-        _logger.LogInformation("Deposit method called with amount: {Amount}", amount);
+        _logger.InfoFormat("Deposit method called with amount: {0}", amount);
 
         if (!ModelState.IsValid)
         {
-            _logger.LogWarning("Model state is invalid.");
+            _logger.Warn("Model state is invalid.");
             return BadRequest(new { Message = ModelState });
         }
 
         var userId = GetUserId();
         if (userId == null)
         {
-            _logger.LogWarning("User is not authenticated.");
+            _logger.Warn("User is not authenticated.");
             return Unauthorized(new { Message = "User is not authenticated." });
         }
 
-        _logger.LogInformation("Adding deposit for user ID: {UserId}", userId);
-        var depositWithdrawId = await _depositWithdrawService.AddDepositAsync(
+        _logger.InfoFormat("Adding deposit for user ID: {0}", userId);
+        var depositWithdrawResponse = await _depositWithdrawService.AddDepositAsync(
             userId, amount);
-        if (depositWithdrawId is null)
+        if (depositWithdrawResponse.Status == "Failed" || depositWithdrawResponse.DepositWithdrawId == null)
         {
-            _logger.LogError("Failed to add deposit for user ID: {UserId}", userId);
+            _logger.ErrorFormat("Failed to add deposit. {0}", depositWithdrawResponse.ErrorMessage);
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Internal server error." });
         }
 
-        _logger.LogInformation("Calling banking API for deposit ID: {DepositWithdrawId}", depositWithdrawId);
+        _logger.InfoFormat("Calling banking API for deposit ID: {0}", depositWithdrawResponse.DepositWithdrawId);
         var bankingApiResponse = await _bankingApiService.DepositBankingApiAsync(
-            depositWithdrawId, amount);
+            (int)depositWithdrawResponse.DepositWithdrawId, amount);
         if (bankingApiResponse is null)
         {
-            _logger.LogError("Banking API call failed for deposit ID: {DepositWithdrawId}", depositWithdrawId);
+            _logger.ErrorFormat("Banking API call failed for deposit ID: {0}", depositWithdrawResponse.DepositWithdrawId);
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Internal server error." });
         }
 
         if (bankingApiResponse.Status == "Success" &&
             !string.IsNullOrWhiteSpace(bankingApiResponse.PaymentUrl))
         {
-            _logger.LogInformation("Payment processed successfully for deposit ID: {DepositWithdrawId}", depositWithdrawId);
+            _logger.InfoFormat("Payment processed successfully for deposit ID: {0}", depositWithdrawResponse.DepositWithdrawId);
             return Ok(new { Status = "Success", bankingApiResponse.PaymentUrl });
         }
 
@@ -78,7 +77,7 @@ public class TransactionController : BaseController
             _ => "An unknown error occurred. Please try again later."
         };
 
-        _logger.LogWarning("Payment failed for deposit ID: {DepositWithdrawId} with error: {ErrorMessage}", depositWithdrawId, errorMessage);
+        _logger.WarnFormat("Payment failed for deposit ID: {0} with error: {1}", depositWithdrawResponse.DepositWithdrawId, errorMessage);
         return BadRequest(new { Message = errorMessage });
     }
 
@@ -87,31 +86,31 @@ public class TransactionController : BaseController
     [HttpPost]
     public async Task<IActionResult> Withdraw(decimal amount)
     {
-        _logger.LogInformation("Withdraw method called with amount: {Amount}", amount);
+        _logger.InfoFormat("Withdraw method called with amount: {0}", amount);
 
         if (!ModelState.IsValid)
         {
-            _logger.LogWarning("Model state is invalid.");
+            _logger.Warn("Model state is invalid.");
             return BadRequest(new { Message = ModelState });
         }
 
         var userId = GetUserId();
         if (userId == null)
         {
-            _logger.LogWarning("User is not authenticated.");
+            _logger.Warn("User is not authenticated.");
             return Unauthorized(new { Message = "User is not authenticated." });
         }
 
-        _logger.LogInformation("Adding withdraw request for user ID: {UserId}", userId);
+        _logger.InfoFormat("Adding withdraw request for user ID: {0}", userId);
         var depositWithdrawId = await _depositWithdrawService.AddWithdrawAsync(
     userId, amount);
         if (depositWithdrawId is null)
         {
-            _logger.LogError("Failed to add withdraw request for user ID: {UserId}", userId);
+            _logger.ErrorFormat("Failed to add withdraw request for user ID: {0}", userId);
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Internal server error." });
         }
 
-        _logger.LogInformation("Withdraw request processed successfully for user ID: {UserId}", userId);
+        _logger.InfoFormat("Withdraw request processed successfully for user ID: {0}", userId);
         return Ok(new { Status = "Success", Message = "Your request will be considered by admin." });
     }
 
@@ -121,18 +120,18 @@ public class TransactionController : BaseController
     public async Task<IActionResult> GetTransactionHistory()
     {
         var userId = GetUserId();
-        _logger.LogInformation("GetTransactionHistory method called for user ID: {UserId}", userId);
+        _logger.InfoFormat("GetTransactionHistory method called for user ID: {0}", userId);
         
         if (userId == null)
         {
-            _logger.LogWarning("User is not authenticated.");
+            _logger.Warn("User is not authenticated.");
             return Unauthorized(new { Message = "User is not authenticated." });
         }
 
-        _logger.LogInformation("Fetching transaction history for user ID: {UserId}", userId);
+        _logger.InfoFormat("Fetching transaction history for user ID: {0}", userId);
         var transactions = await _transactionRepository.GetAllUserAsync(userId);
 
-        _logger.LogInformation("Transaction history retrieved successfully for user ID: {UserId}", userId);
+        _logger.InfoFormat("Transaction history retrieved successfully for user ID: {0}", userId);
         return Json(new { data = transactions });
     }
 }

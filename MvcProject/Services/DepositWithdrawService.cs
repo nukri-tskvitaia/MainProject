@@ -13,7 +13,7 @@ public class DepositWithdrawService : IDepositWithdrawService
     }
     
     // Done
-    public async Task<string?> AddDepositAsync(string userId, decimal amount)
+    public async Task<CreateDepositWithdrawResponse> AddDepositAsync(string userId, decimal amount)
     {
         var transaction = new DepositWithdrawRequestModel
         {
@@ -22,18 +22,12 @@ public class DepositWithdrawService : IDepositWithdrawService
             Amount = amount,
             Status = "Pending",
         };
-        
-        var response = await _request.CreateAsync(transaction);
-
-        if (response == null)
-        {
-            return null;
-        }
+        var response = await _request.CreateDepositAsync(transaction);
 
         return response;
     }
 
-    public async Task<string?> AddWithdrawAsync(string userId, decimal amount)
+    public async Task<CreateDepositWithdrawResponse> AddWithdrawAsync(string userId, decimal amount)
     {
         var transaction = new DepositWithdrawRequestModel
         {
@@ -42,13 +36,7 @@ public class DepositWithdrawService : IDepositWithdrawService
             Amount = amount,
             Status = "Pending",
         };
-
-        var response = await _request.CreateAsync(transaction);
-
-        if (response == null)
-        {
-            return null;
-        }
+        var response = await _request.CreateWithdrawAsync(transaction);
 
         return response;
     }
