@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcProject", "MvcProject\MvcProject.csproj", "{1DA8B65D-10B1-47A4-BA5C-5F104CF28358}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcProject", "MvcProject\MvcProject.csproj", "{1DA8B65D-10B1-47A4-BA5C-5F104CF28358}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingApi", "BankingApi\BankingApi.csproj", "{F36078AA-AA65-40B7-B2F3-99637DE3D614}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankingApi", "BankingApi\BankingApi.csproj", "{F36078AA-AA65-40B7-B2F3-99637DE3D614}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasinoApi", "CasinoApi\CasinoApi.csproj", "{B4018525-3FAC-4A87-8D31-A6F16EF312D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{F36078AA-AA65-40B7-B2F3-99637DE3D614}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F36078AA-AA65-40B7-B2F3-99637DE3D614}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F36078AA-AA65-40B7-B2F3-99637DE3D614}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4018525-3FAC-4A87-8D31-A6F16EF312D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4018525-3FAC-4A87-8D31-A6F16EF312D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4018525-3FAC-4A87-8D31-A6F16EF312D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4018525-3FAC-4A87-8D31-A6F16EF312D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
