@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MvcProject.Data;
 
@@ -11,9 +12,11 @@ using MvcProject.Data;
 namespace MvcProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250204025318_AddTokensTable")]
+    partial class AddTokensTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -191,30 +194,6 @@ namespace MvcProject.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("DepositWithdrawRequests");
-                });
-
-            modelBuilder.Entity("MvcProject.Models.Tokens", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("IsPrivateTokenValid")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPublicTokenValid")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PrivateToken")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("PublicToken")
-                        .IsRequired()
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("UserId")
-                        .HasName("Pk_Tokens_UserId");
-
-                    b.ToTable("Tokens");
                 });
 
             modelBuilder.Entity("MvcProject.Models.Transaction", b =>
@@ -404,17 +383,6 @@ namespace MvcProject.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MvcProject.Models.Tokens", b =>
-                {
-                    b.HasOne("MvcProject.Models.User", "User")
-                        .WithOne("Tokens")
-                        .HasForeignKey("MvcProject.Models.Tokens", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MvcProject.Models.Transaction", b =>
                 {
                     b.HasOne("MvcProject.Models.User", "User")
@@ -438,8 +406,6 @@ namespace MvcProject.Migrations
             modelBuilder.Entity("MvcProject.Models.User", b =>
                 {
                     b.Navigation("DepositWithdraws");
-
-                    b.Navigation("Tokens");
 
                     b.Navigation("Transactions");
 

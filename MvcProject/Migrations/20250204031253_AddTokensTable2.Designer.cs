@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MvcProject.Data;
 
@@ -11,9 +12,11 @@ using MvcProject.Data;
 namespace MvcProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250204031253_AddTokensTable2")]
+    partial class AddTokensTable2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -205,11 +208,11 @@ namespace MvcProject.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("PrivateToken")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PublicToken")
                         .IsRequired()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId")
                         .HasName("Pk_Tokens_UserId");

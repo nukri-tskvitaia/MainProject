@@ -2,7 +2,75 @@
     ViewData["Title"] = "Home Page";
 }
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <div class="text-center">
     <h1 class="display-4">Welcome To Main Project</h1>
-
 </div>
+<div>
+    @if (User?.Identity?.IsAuthenticated != false)
+    {
+        @if (User!.IsInRole("Player"))
+        {
+            <h2>Generate Public Token</h2>
+
+            <button id="generatePublicToken">Generate Token</button>
+            <p>Public Token: <span id="publicToken"></span></p>
+        }
+    }
+</div>
+<style>
+    .text-center {
+        margin-top: 20px;
+    }
+
+    h1 {
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        color: #333;
+    }
+
+    h2 {
+        font-size: 22px;
+        margin-top: 20px;
+    }
+
+    #generatePublicToken {
+        font-size: 16px;
+        padding: 10px 20px;
+        border: 2px solid #333;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+        #generatePublicToken:hover {
+            transform: scale(1.05);
+        }
+
+    p {
+        font-size: 18px;
+        margin-top: 10px;
+    }
+
+    #publicToken {
+        font-weight: bold;
+        color: #007bff;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $("#generatePublicToken").click(function () {
+            $.ajax({
+                url: "/CasinoIntegration/GeneratePublicToken",
+                type: "POST",
+                success: function (data) {
+                    $("#publicToken").text(data);
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.status);
+                }
+            });
+        });
+    });
+</script>
