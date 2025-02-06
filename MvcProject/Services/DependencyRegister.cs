@@ -19,5 +19,6 @@ public static class DependencyRegister
         services.AddScoped<IBankingApiService, BankingApiService>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IProcessRepository, ProcessRepository>();
+        services.AddScoped<ITokenRepository, TokenRepository>();
     }
 }

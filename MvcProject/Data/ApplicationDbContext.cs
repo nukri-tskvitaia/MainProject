@@ -22,6 +22,8 @@ public partial class ApplicationDbContext : IdentityDbContext<User>
 
     public DbSet<Wallet> Wallets { get; set; }
 
+    public DbSet<Tokens> Tokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -81,6 +83,16 @@ public partial class ApplicationDbContext : IdentityDbContext<User>
             entity.HasOne(e => e.User)
                 .WithOne(e => e.Wallet)
                 .HasForeignKey<Wallet>(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Tokens>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("Pk_Tokens_UserId");
+
+            entity.HasOne(t => t.User)
+                .WithOne(u => u.Tokens)
+                .HasForeignKey<Tokens>(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(builder);

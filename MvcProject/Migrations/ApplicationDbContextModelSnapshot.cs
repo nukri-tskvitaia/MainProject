@@ -193,6 +193,30 @@ namespace MvcProject.Migrations
                     b.ToTable("DepositWithdrawRequests");
                 });
 
+            modelBuilder.Entity("MvcProject.Models.Tokens", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsPrivateTokenValid")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublicTokenValid")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PrivateToken")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("PublicToken")
+                        .IsRequired()
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("UserId")
+                        .HasName("Pk_Tokens_UserId");
+
+                    b.ToTable("Tokens");
+                });
+
             modelBuilder.Entity("MvcProject.Models.Transaction", b =>
                 {
                     b.Property<string>("Id")
@@ -380,6 +404,17 @@ namespace MvcProject.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MvcProject.Models.Tokens", b =>
+                {
+                    b.HasOne("MvcProject.Models.User", "User")
+                        .WithOne("Tokens")
+                        .HasForeignKey("MvcProject.Models.Tokens", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MvcProject.Models.Transaction", b =>
                 {
                     b.HasOne("MvcProject.Models.User", "User")
@@ -403,6 +438,8 @@ namespace MvcProject.Migrations
             modelBuilder.Entity("MvcProject.Models.User", b =>
                 {
                     b.Navigation("DepositWithdraws");
+
+                    b.Navigation("Tokens");
 
                     b.Navigation("Transactions");
 
