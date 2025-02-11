@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
         if (request is null || !ModelState.IsValid ||
             string.IsNullOrWhiteSpace(request.PublicToken))
         {
-            return StatusCode(411, new { StatusCode = 411 });
+            return Ok(new { StatusCode = 411 });
         }
 
         try
@@ -30,14 +30,14 @@ public class AuthController : ControllerBase
 
             if (response.StatusCode != 200)
             {
-                return StatusCode(response.StatusCode, new { response.StatusCode });
+                return Ok(new { response.StatusCode });
             }
 
             return Ok(new { response.StatusCode, response.Data });
         }
         catch
         {
-            return StatusCode(500, new { StatusCode = 500 });
+            return Ok(new { StatusCode = 500 });
         }
     }
 }

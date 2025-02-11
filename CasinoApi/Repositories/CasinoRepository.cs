@@ -78,8 +78,9 @@ public class CasinoRepository : ICasinoRepository
     public async Task<UpdatedBalanceResponse> MakeBetAsync(BetRequest bet)
     {
         var parameters = new DynamicParameters();
+        var transactionId = Guid.NewGuid().ToString();
 
-        parameters.Add("@TransactionId", bet.TransactionId, DbType.String, size: 450);
+        parameters.Add("@TransactionId", transactionId, DbType.String, size: 450);
         parameters.Add("@Token", bet.Token, DbType.String, size: 36);
         parameters.Add("@Amount", bet.Amount, DbType.Decimal);
         parameters.Add("@BetTypeId", bet.BetTypeId, DbType.Int32);
@@ -104,7 +105,7 @@ public class CasinoRepository : ICasinoRepository
         {
             Data = new UpdatedBalanceModel
             {
-                TransactionId = bet.TransactionId,
+                TransactionId = transactionId,
                 CurrentBalance = parameters.Get<decimal?>("@UpdatedBalance"),
             },
             StatusCode = parameters.Get<int>("@StatusCode"),
@@ -117,8 +118,9 @@ public class CasinoRepository : ICasinoRepository
     public async Task<UpdatedBalanceResponse> WinAsync(WinRequest win)
     {
         var parameters = new DynamicParameters();
+        var transactionId = Guid.NewGuid().ToString();
 
-        parameters.Add("@TransactionId", win.TransactionId, DbType.String, size: 450);
+        parameters.Add("@TransactionId", transactionId, DbType.String, size: 450);
         parameters.Add("@Token", win.Token, DbType.String, size: 36);
         parameters.Add("@Amount", win.Amount, DbType.Decimal);
         parameters.Add("@BetTypeId", win.WinTypeId, DbType.Int32);
@@ -143,7 +145,7 @@ public class CasinoRepository : ICasinoRepository
         {
             Data = new UpdatedBalanceModel
             {
-                TransactionId = win.TransactionId,
+                TransactionId = transactionId,
                 CurrentBalance = parameters.Get<decimal?>("@UpdatedBalance")
             },
             StatusCode = parameters.Get<int>("@StatusCode"),
@@ -156,10 +158,11 @@ public class CasinoRepository : ICasinoRepository
     public async Task<UpdatedBalanceResponse> CancelBetAsync(CancelBetRequest cancelBet)
     {
         var parameters = new DynamicParameters();
+        var transactionId = Guid.NewGuid().ToString();
 
+        parameters.Add("@TransactionId", transactionId, DbType.String, size: 450);
         parameters.Add("@Token", cancelBet.Token, DbType.String, size: 36);
         parameters.Add("@Amount", cancelBet.Amount, DbType.Decimal);
-        parameters.Add("@TransactionId", cancelBet.TransactionId, DbType.String, size: 450);
         parameters.Add("@BetTypeId", cancelBet.BetTypeId, DbType.Int32);
         parameters.Add("@GameId", cancelBet.GameId, DbType.Int32);
         parameters.Add("@ProductId", cancelBet.ProductId, DbType.Int32);
@@ -183,7 +186,7 @@ public class CasinoRepository : ICasinoRepository
         {
             Data = new UpdatedBalanceModel
             {
-                TransactionId = cancelBet.TransactionId,
+                TransactionId = transactionId,
                 CurrentBalance = parameters.Get<decimal?>("@UpdatedBalance"),
             },
             StatusCode = parameters.Get<int>("@StatusCode"),
@@ -196,11 +199,12 @@ public class CasinoRepository : ICasinoRepository
     public async Task<UpdatedBalanceResponse> ChangeWinAsync(ChangeWinRequest changeWin)
     {
         var parameters = new DynamicParameters();
+        var transactionId = Guid.NewGuid().ToString();
 
+        parameters.Add("@TransactionId", transactionId, DbType.String, size: 450);
         parameters.Add("@Token", changeWin.Token, DbType.String, size: 36);
         parameters.Add("@Amount", changeWin.Amount, DbType.Decimal);
         parameters.Add("@PreviousAmount", changeWin.PreviousAmount, DbType.Decimal);
-        parameters.Add("@TransactionId", changeWin.TransactionId, DbType.String, size: 450);
         parameters.Add("@PreviousTransactionId", changeWin.PreviousTransactionId, DbType.String, size: 36);
         parameters.Add("@BetTypeId", changeWin.ChangeWinTypeId, DbType.Int32);
         parameters.Add("@GameId", changeWin.GameId, DbType.Int32);
@@ -222,7 +226,7 @@ public class CasinoRepository : ICasinoRepository
         {
             Data = new UpdatedBalanceModel
             {
-                TransactionId = changeWin.TransactionId,
+                TransactionId = transactionId,
                 CurrentBalance = parameters.Get<decimal?>("@UpdatedBalance")
             },
             StatusCode = parameters.Get<int>("@StatusCode"),

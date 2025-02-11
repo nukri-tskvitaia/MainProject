@@ -20,17 +20,26 @@ public class CasinoController : ControllerBase
     {
         if (bet is null || !ModelState.IsValid)
         {
-            return StatusCode(411, new { StatusCode = 411 });
+            return Ok(new
+            {
+                StatusCode = 411
+            });
         }
 
         if (string.IsNullOrWhiteSpace(bet.Token))
         {
-            return StatusCode(404, new { StatusCode = 404 });
+            return Ok(new
+            {
+                StatusCode = 404
+            });
         }
 
         if (bet.Amount <= 0)
         {
-            return StatusCode(407, new { StatusCode = 407 });
+            return Ok(new
+            {
+                StatusCode = 407
+            });
         }
 
         try
@@ -39,7 +48,7 @@ public class CasinoController : ControllerBase
 
             if (response.StatusCode != 200)
             {
-                return StatusCode(response.StatusCode, new { response.StatusCode });
+                return Ok(new { response.StatusCode });
             }
 
             return Ok(response);
@@ -47,7 +56,10 @@ public class CasinoController : ControllerBase
         }
         catch
         {
-            return StatusCode(500, new { StatusCode = 500 });
+            return Ok(new
+            {
+                StatusCode = 500
+            });
         }
     }
 
@@ -56,7 +68,10 @@ public class CasinoController : ControllerBase
     {
         if (win is null || !ModelState.IsValid || win.Amount <= 0 || string.IsNullOrWhiteSpace(win.Token))
         {
-            return StatusCode(411, new { StatusCode = 411 });
+            return Ok(new
+            {
+                StatusCode = 411
+            });
         }
 
         try
@@ -65,7 +80,7 @@ public class CasinoController : ControllerBase
 
             if (response.StatusCode != 200)
             {
-                return StatusCode(response.StatusCode, new { response.StatusCode });
+                return Ok(new { response.StatusCode });
             }
 
             return Ok(response);
@@ -73,7 +88,10 @@ public class CasinoController : ControllerBase
         }
         catch
         {
-            return StatusCode(500, new { StatusCode = 500 });
+            return Ok(new
+            {
+                StatusCode = 500
+            });
         }
     }
 
@@ -82,7 +100,10 @@ public class CasinoController : ControllerBase
     {
         if (cancelBet is null || !ModelState.IsValid || string.IsNullOrWhiteSpace(cancelBet.Token))
         {
-            return StatusCode(411, new { StatusCode = 411 });
+            return Ok(new
+            {
+                StatusCode = 411
+            });
         }
 
         try
@@ -91,7 +112,7 @@ public class CasinoController : ControllerBase
 
             if (response.StatusCode != 200)
             {
-                return StatusCode(response.StatusCode, new { response.StatusCode });
+                return Ok(new { response.StatusCode });
             }
 
             return Ok(response);
@@ -99,7 +120,10 @@ public class CasinoController : ControllerBase
         }
         catch
         {
-            return StatusCode(500, new { StatusCode = 500 });
+            return Ok(new
+            {
+                StatusCode = 500
+            });
         }
     }
 
@@ -108,7 +132,10 @@ public class CasinoController : ControllerBase
     {
         if (changeWin is null || !ModelState.IsValid || string.IsNullOrWhiteSpace(changeWin.Token))
         {
-            return StatusCode(411, new { StatusCode = 411 });
+            return Ok(new
+            {
+                StatusCode = 411
+            });
         }
 
         try
@@ -117,7 +144,7 @@ public class CasinoController : ControllerBase
 
             if (response.StatusCode != 200)
             {
-                return StatusCode(response.StatusCode, new { response.StatusCode });
+                return Ok(new { response.StatusCode });
             }
 
             return Ok(response);
@@ -125,7 +152,10 @@ public class CasinoController : ControllerBase
         }
         catch
         {
-            return StatusCode(500, new { StatusCode = 500 });
+            return Ok(new
+            {
+                StatusCode = 500
+            });
         }
     }
 
@@ -134,7 +164,10 @@ public class CasinoController : ControllerBase
     {
         if (getBalance is null || !ModelState.IsValid || string.IsNullOrWhiteSpace(getBalance.Token))
         {
-            return StatusCode(411, new { StatusCode = 411 });
+            return Ok(new
+            {
+                StatusCode = 411
+            });
         }
 
         try
@@ -143,7 +176,7 @@ public class CasinoController : ControllerBase
 
             if (response.StatusCode != 200)
             {
-                return StatusCode(response.StatusCode, new { response.StatusCode });
+                return Ok(new { response.StatusCode });
             }
 
             return Ok(response);
@@ -151,7 +184,10 @@ public class CasinoController : ControllerBase
         }
         catch
         {
-            return StatusCode(500, new { StatusCode = 500 });
+            return Ok(new
+            {
+                StatusCode = 500
+            });
         }
     }
 
@@ -160,7 +196,10 @@ public class CasinoController : ControllerBase
     {
         if (getUserInfo is null || !ModelState.IsValid || string.IsNullOrWhiteSpace(getUserInfo.Token))
         {
-            return StatusCode(411, new { StatusCode = 411 });
+            return Ok(new
+            {
+                StatusCode = 411
+            });
         }
 
         try
@@ -169,7 +208,7 @@ public class CasinoController : ControllerBase
 
             if (response.StatusCode != 200)
             {
-                return StatusCode(response.StatusCode, new { response.StatusCode });
+                return Ok(new { response.StatusCode });
             }
 
             return Ok(response);
@@ -177,7 +216,10 @@ public class CasinoController : ControllerBase
         }
         catch
         {
-            return StatusCode(500, new { StatusCode = 500 });
+            return Ok(new
+            {
+                StatusCode = 500
+            });
         }
     }
 }
